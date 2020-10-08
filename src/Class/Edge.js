@@ -3,10 +3,4 @@ export default class Edge {
     this.to = to;
     this.from = from;
   }
-  get to() {
-    return this.to;
-  }
-  get from() {
-    return this.from;
-  }
 }
