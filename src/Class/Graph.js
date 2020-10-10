@@ -6,11 +6,12 @@ import Edge from "./Edge";
 export default class Graph {
   nodes;
   edges;
-  score = 0;
+  score;
 
   constructor(nodes, edges) {
     this.nodes = _.cloneDeep(nodes);
     this.edges = _.cloneDeep(edges);
+    this.score = 0;
   }
 
   randomizeNodesColor() {
@@ -21,7 +22,12 @@ export default class Graph {
     this.score = 0;
     this.edges.forEach((edge) => {
       if (this.nodes[edge.to].group !== this.nodes[edge.from].group) {
-        this.score += 1;
+        console.log(
+          `to : ${this.nodes[edge.to].group}, from : ${
+            this.nodes[edge.from].group
+          }`
+        );
+        this.score++;
       }
     });
   }
