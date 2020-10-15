@@ -1,5 +1,6 @@
 import Graph from "./Graph";
-import { getRandomInteger, getRandomBoolean } from "../Functions/functions";
+import { getRandomInteger } from "../Functions/functions";
+
 export default class Population {
   generationCount;
   schema;
@@ -16,11 +17,15 @@ export default class Population {
    */
   constructor(size, schema) {
     this.size = size;
-    this.schema = new Graph(schema.nodes, schema.edges);
+    this.schema = new Graph(schema.nodes, schema.edges, schema.numberOfColors);
     this.generationCount = 0;
 
     for (let index = 0; index < size; index++) {
-      let sample = new Graph(this.schema.nodes, this.schema.edges);
+      let sample = new Graph(
+        this.schema.nodes,
+        this.schema.edges,
+        this.schema.numberOfColors
+      );
       sample.randomizeNodesColor();
       this.population.push(sample);
     }
@@ -85,10 +90,6 @@ function selection(population) {
 function checkForWinningCandidate(population, schema) {
   for (let index = 0; index < population.length; index++) {
     if (population[index].score === schema.edges.length) {
-      console.log(population[index]);
-      console.log("1: " + population[index].score);
-      population[index].calculateScore();
-      console.log("2: " + population[index].score);
       return population[index];
     }
   }
@@ -119,17 +120,7 @@ function reproduction(population) {
  */
 function mutation(population) {
   population.forEach((sample) => {
-    if (getRandomBoolean()) {
-      // Mutation
-      if (getRandomBoolean()) {
-        // Mutation aggressive
-        sample.mutate(sample.nodes.length - sample.nodes.length / 4);
-      } else {
-        // Mutation faible
-        sample.mutate(sample.nodes.length / 2);
-      }
-    }
-    // Aucune mutation
+    sample.mutate();
   });
   return population;
 }

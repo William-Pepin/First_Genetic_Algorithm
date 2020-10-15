@@ -5,9 +5,10 @@ export default class Node {
     this.id = id;
     this.label = String(id);
     this.group = group;
+    this.connexion = 0;
   }
 
-  randomizeColor() {
-    this.group = getRandomInteger(0, 4);
+  randomizeColor(numberOfColors) {
+    this.group = getRandomInteger(0, numberOfColors);
   }
 }
