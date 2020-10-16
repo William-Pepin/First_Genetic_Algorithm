@@ -1,213 +1,163 @@
 import React, { useState } from "react";
-import Graph from "react-graph-vis";
-import Population from "./Class/Population";
-import _ from "lodash";
 import { v4 as uuidv4 } from "uuid";
-import "./App.css";
+import Graph from "react-graph-vis";
+
+import { options300, options600 } from "./Config/options";
+import Population from "./Class/Population";
 import generateGraph from "./Functions/generateGraph";
 
-//const nodes = [
-//  new Node(0),
-//  new Node(1),
-//  new Node(2),
-//  new Node(3),
-//  new Node(4),
-//  new Node(5),
-//  new Node(6),
-//  new Node(7),
-//  new Node(8),
-//  new Node(9),
-//];
-//const edges = [
-//  new Edge(0, 1),
-//  new Edge(0, 2),
-//  new Edge(1, 2),
-//  new Edge(4, 2),
-//  new Edge(1, 3),
-//  new Edge(4, 3),
-//  new Edge(4, 3),
-//  new Edge(1, 4),
-//  new Edge(4, 5),
-//  new Edge(5, 6),
-//  new Edge(6, 7),
-//  new Edge(6, 8),
-//  new Edge(7, 8),
-//  new Edge(8, 9),
-//  new Edge(7, 9),
-//];
+let population;
 
-const options = {
-  layout: {
-    hierarchical: false,
-    randomSeed: 1,
-  },
-
-  physics: {
-    enabled: false,
-  },
-  edges: {
-    color: "#000000",
-    arrows: {
-      to: false,
-    },
-  },
-  height: "300px",
-};
-const options2 = {
-  layout: {
-    hierarchical: false,
-    randomSeed: 1,
-  },
-  physics: {
-    enabled: false,
-  },
-  edges: {
-    color: "#000000",
-    arrows: {
-      to: false,
-    },
-  },
-  height: "600px",
-};
-
-const events = {};
-const graphSchema = generateGraph(10, 3);
-let population = new Population(8, graphSchema);
-
+/**
+ * @Date 2020-10-15
+ * @Author William Pépin 1634597
+ * @Desc Fonction permettant de gérer mon application, d'afficher les modules et de gérer la logique de l'algorithme.
+ */
 function App() {
-  const [populationArray, setPopulation] = useState(population.population);
-  const [winner, setWinner] = useState(undefined);
+  const [graphs, setGraphs] = useState(); // Graphique de la population
+  const [numberOfNodes, setNumberOfNodes] = useState(3); // Nombre de noeuds que l'utilisateur détermine
+  const [numberOfColors, setNumberOfColors] = useState(); // Nombre de couleurs que l'utilisateur détermine
+  const [winner, setWinner] = useState(); // Gagnant de toutes les générations
+  const [schema, setSchema] = useState(); // Schéma de base
+  const [generationCount, setGenerationCount] = useState(0); // Compteur de génération
+
+  /**
+   * @Date 2020-10-15
+   * @Author William Pépin
+   * @Desc Fonction permettant d'appeler la génération de la population à l'aide des données de l'utilisateur.
+   * @param e événement du bouton
+   * @returns null
+   */
+  const generatePopulation = (e) => {
+    e.preventDefault();
+
+    population = new Population(
+      8,
+      generateGraph(numberOfNodes, numberOfColors)
+    );
+
+    setNumberOfNodes(population.schema.nodes.length);
+    setNumberOfColors(population.schema.numberOfColors);
+    setSchema(population.schema);
+    setGraphs(population.population);
+    setGenerationCount(population.generationCount);
+  };
+
+  /**
+   * @Date 2020-10-15
+   * @Author William Pépin
+   * @Desc Fonction permettant d'effectuer un tour de génération.
+   * @param null
+   * @returns null
+   */
+  const generationLap = () => {
+    population.generation();
+
+    setGraphs(population.population);
+    setWinner(population.winner);
+    setGenerationCount(population.generationCount);
+  };
+
+  /**
+   * @Date 2020-10-15
+   * @Author William Pépin
+   * @Desc Fonction permettant d'effectuer des tours de génération jusqu'attend qu'un gagnant soit trouvés.
+   * @param null
+   * @returns null
+   */
+  const generationLaps = () => {
+    while (population.winner === undefined) {
+      population.generation();
+    }
+    setGenerationCount(population.generationCount);
+    setGraphs(population.population);
+    setWinner(population.winner);
+  };
+
+  /**
+   * @Date 2020-10-15
+   * @Author William Pépin
+   * @Desc Fonction permettant de gérer les changements dans le nombre de noeuds
+   * @param e événement de la balise input
+   * @returns null
+   */
+  const handleNumberOfNodesChange = (e) => {
+    e.preventDefault();
+    setNumberOfNodes(e.target.value);
+  };
+
+  /**
+   * @Date 2020-10-15
+   * @Author William Pépin
+   * @Desc Fonction permettant de gérer les changements dans le nombre de couleurs
+   * @param e événement de la balise input
+   * @returns null
+   */
+  const handleNumberOfColorsChange = (e) => {
+    e.preventDefault();
+    setNumberOfColors(e.target.value);
+  };
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateRows: "1fr auto 1fr",
-        gridAutoColumns: "1fr",
-      }}
-    >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateRows: "1fr",
-          gridTemplateColumns: "1fr 1fr",
-        }}
-      >
-        <Graph
-          key={uuidv4()}
-          graph={graphSchema}
-          options={options2}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        {winner && (
-          <Graph
-            key={uuidv4()}
-            graph={winner}
-            options={options2}
-            events={events}
-            getNetwork={(network) => {
-              //  if you want access to vis.js network api you can set the state in a parent component using this property
-            }}
-          />
-        )}
+    <div style={styles.wrapper}>
+      <div style={styles.control}>
+        <form onSubmit={generatePopulation}>
+          <label>
+            Nombre de noeuds:
+            <input
+              value={numberOfNodes}
+              type="number"
+              onChange={handleNumberOfNodesChange}
+            />
+          </label>
+          <label>
+            Nombre de couleurs:
+            <input
+              value={numberOfColors}
+              type="number"
+              name="numberOfColors"
+              onChange={handleNumberOfColorsChange}
+            />
+          </label>
+          <input type="submit" value="Générer un nouveau graphique." />
+        </form>
+        <button onClick={generationLap}>Generate</button>
+        <button onClick={generationLaps}>Generate ALL</button>
+        <p>{generationCount}</p>
       </div>
-      <div>
-        <button
-          onClick={() => {
-            if (winner === undefined) {
-              population.generation();
-              setPopulation(population.population);
-              setWinner(population.winner);
-            }
-          }}
-        >
-          Generate
-        </button>
+      <div style={styles.mainGraph}>
+        {schema && <Graph key={uuidv4()} graph={schema} options={options600} />}
+        {winner && <Graph key={uuidv4()} graph={winner} options={options600} />}
       </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr 1fr",
-          gridTemplateRows: "1fr 1fr",
-        }}
-      >
-        <Graph
-          key={uuidv4()}
-          graph={populationArray[0]}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        <Graph
-          key={uuidv4()}
-          graph={populationArray[1]}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        <Graph
-          key={uuidv4()}
-          graph={_.cloneDeep(populationArray[2])}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        <Graph
-          key={uuidv4()}
-          graph={_.cloneDeep(populationArray[3])}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        <Graph
-          key={uuidv4()}
-          graph={_.cloneDeep(populationArray[4])}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        <Graph
-          key={uuidv4()}
-          graph={_.cloneDeep(populationArray[5])}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        <Graph
-          key={uuidv4()}
-          graph={_.cloneDeep(populationArray[6])}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-        <Graph
-          key={uuidv4()}
-          graph={_.cloneDeep(populationArray[7])}
-          options={options}
-          events={events}
-          getNetwork={(network) => {
-            //  if you want access to vis.js network api you can set the state in a parent component using this property
-          }}
-        />
-      </div>
+      {graphs && (
+        <div style={styles.populationGraph}>
+          {graphs.map((graph) => {
+            console.log(graph);
+            return <Graph key={uuidv4()} graph={graph} options={options300} />;
+          })}
+        </div>
+      )}
     </div>
   );
 }
+
+// Style de l'application
+const styles = {
+  wrapper: {
+    display: "grid",
+    gridTemplateRows: "auto1 fr 1fr",
+    gridAutoColumns: "1fr",
+  },
+  mainGraph: {
+    display: "grid",
+    gridTemplateRows: "1fr",
+    gridTemplateColumns: "1fr 1fr",
+  },
+  populationGraph: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr 1fr",
+    gridTemplateRows: "1fr 1fr",
+  },
+};
 
 export default App;

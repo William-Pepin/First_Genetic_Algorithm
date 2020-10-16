@@ -1,6 +1,6 @@
 /**
- * @Date 2020-02-10
- * @Author w3school
+ * @Date 2020-10-15
+ * @Author W3SCHOOl
  * @Desc Fonction permettant d'obtenir un nombre aléatoire entre deux nombres donnés.
  * @param min nombre minimum
  * @param max nombre maximum
@@ -11,7 +11,7 @@ export function getRandomInteger(min, max) {
 }
 
 /**
- * @Date 2020-02-10
+ * @Date 2020-10-15
  * @Author William Pépin
  * @Desc Fonction permettant d'obtenir un booléen aléatoire.
  * @param null
